@@ -19,6 +19,7 @@ Touch first=null;
 boolean assigned = false;
 ArrayList<PVector> zoneLocations;
 JSONArray values;
+ArrayList<PVector> boundingHulls;
 
 public void weka() throws Exception{
     
@@ -82,26 +83,10 @@ public void weka() throws Exception{
        System.out.println();
      }
   }
-  
-void setup(){
-  try{
-    weka();
-  }
-  catch(Exception e){};
-  //SMT and Processing setup
-  values = loadJSONArray("cars.json");
-//  removeElements();
-//  println(values.size());
-  size( displayWidth, displayHeight, SMT.RENDERER);
-  SMT.init( this, TouchSource.AUTOMATIC);
-  
-  for(int i=0; i<values.size(); i++){
-    JSONObject car = values.getJSONObject(i);
-    SMT.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
-  }
-  
-  PieMenuZone menu = new PieMenuZone("PieMenu", 200, 400, 355);
-  menu.x = 1200;
+
+void addPieMenu(Touch t){
+  SMT.remove("PieMenu");
+  PieMenuZone menu = new PieMenuZone("PieMenu", 200, (int)t.getX(), (int)t.getY());
   SMT.add(menu);
   menu.add("Forward",loadImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE_lpEhrobnGhxrMyF6TFLUuAcVpGJixDzak4TxVQjjiDW5UjF", "png"));
   menu.add("Submenu");
@@ -109,6 +94,28 @@ void setup(){
   menu.add("View Source");
   menu.setDisabled("View Source",true);
   menu.add("Remove Self");
+}
+
+void setup(){
+  try{
+    weka();
+  }
+  catch(Exception e){};
+  boundingHulls = new ArrayList<PVector>();
+  
+  //SMT and Processing setup
+  values = loadJSONArray("cars.json");
+//  removeElements();
+//  println(values.size());
+  size( displayWidth, displayHeight, SMT.RENDERER);
+  SMT.init( this, TouchSource.AUTOMATIC);
+  Zone zone = new Zone("Parent",0,0,displayWidth,displayHeight);
+  for(int i=0; i<values.size(); i++){
+    JSONObject car = values.getJSONObject(i);
+    zone.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
+  }
+  SMT.add(zone);
+  
   //Make a new Zone
   //Zone circleZoneOne = new ShapeZone("CircleOne", 300, 200, 30, 30);
   //Zone circleZoneTwo = new ShapeZone("CircleTwo", 600, 400, 30, 30);
@@ -134,10 +141,23 @@ void removeElements(){
   }
   values = temp;
 }
+
+void showBoundingHull(){
+  stroke(255);
+  beginShape();
+  for(PVector t : boundingHulls){
+    vertex((int)t.x, (int)t.y);
+//    println(boundingHulls.size());
+  }
+  endShape();
+  stroke(0);
+}
+
 //Draw function for the sketch
 void draw(){
   background( 30);
   zoneLocations.clear();
+  showBoundingHull();
   showHullAroundPts();
   if(SMT.getTouches().length>0){
     first=SMT.getTouches()[0];
@@ -260,4 +280,41 @@ void touchUpViewSource(){println("View Source");}
 void touchUpRemoveSelf(Zone z){println("Remove Self");SMT.get("PieMenu").remove(z);}
 void touchUpPieMenu(PieMenuZone m){
   println("Selected: "+m.getSelectedName());
+}
+
+void drawParent(Zone zone){
+//  background(255);
+}
+int count=0;
+void touchParent(Zone z){ 
+   // Check out the gesture example for RST 
+   int numTouches = z.getNumTouches();
+   Touch active = z.getActiveTouch(numTouches-1);
+   if(!(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y)){
+     boundingHulls.add(new PVector(active.x, active.y));
+   }
+   else {
+     count++;
+   }
+//   println(active.getCurrentPoint().x+":"+active.getCurrentPoint().y+" - "+active.getLastPoint().x+":"+active.getLastPoint().y);
+     println("Last"+active.getLastPoint());
+//   println(active.getTuioTime().getTotalMilliseconds());
+//   if(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y) count++;
+//   println(count);
+   if(count > 10){
+//     println("SHOW PIE");
+     PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
+     if(m == null){
+       addPieMenu(active);
+     }
+     count = 0;
+   }
+//   println(SMT.getTouchesFromZone(z).length);
+//   println(SMT.getTouchesFromZone(z)[0].getSessionID());
+}
+void touchDownParent(Zone z){
+  SMT.remove("PieMenu");
+   // Check out the gesture example for RST 
+//   println(SMT.getTouchesFromZone(z).length);
+//   println(SMT.getTouchesFromZone(z)[0].getTuioTime().getTotalMilliseconds() );
 }
