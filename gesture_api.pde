@@ -1,5 +1,11 @@
 import megamu.mesh.*;
-
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
 /**
  * Sketch for Gesture Api
  */
@@ -14,23 +20,101 @@ boolean assigned = false;
 ArrayList<PVector> zoneLocations;
 JSONArray values;
 
+public void weka() throws Exception{
+    
+     // Declare two numeric attributes
+     Attribute Attribute1 = new Attribute("firstNumeric");
+     Attribute Attribute2 = new Attribute("secondNumeric");
+     
+     // Declare a nominal attribute along with its values
+     FastVector fvNominalVal = new FastVector(3);
+     fvNominalVal.addElement("blue");
+     fvNominalVal.addElement("gray");
+     fvNominalVal.addElement("black");
+     Attribute Attribute3 = new Attribute("aNominal", fvNominalVal);
+     
+     // Declare the class attribute along with its values
+     FastVector fvClassVal = new FastVector(2);
+     fvClassVal.addElement("positive");
+     fvClassVal.addElement("negative");
+     Attribute ClassAttribute = new Attribute("theClass", fvClassVal);
+     
+     // Declare the feature vector
+     FastVector fvWekaAttributes = new FastVector(4);
+     fvWekaAttributes.addElement(Attribute1);    
+     fvWekaAttributes.addElement(Attribute2);    
+     fvWekaAttributes.addElement(Attribute3);    
+     fvWekaAttributes.addElement(ClassAttribute);
+     
+     // Create an empty training set
+     Instances isTrainingSet = new Instances("Rel", fvWekaAttributes, 10);       
+     
+     // Set class index
+     isTrainingSet.setClassIndex(3);
+     
+     // Create the instance
+     Instance iExample = new Instance(4);
+     iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), 1.0);      
+     iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), 0.5);      
+     iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), "gray");
+     iExample.setValue((Attribute)fvWekaAttributes.elementAt(3), "positive");
+     
+     // add the instance
+     isTrainingSet.add(iExample);
+     Classifier cModel = (Classifier)new NaiveBayes();   
+     cModel.buildClassifier(isTrainingSet);
+
+     // Test the model
+     Evaluation eTest = new Evaluation(isTrainingSet);
+     eTest.evaluateModel(cModel, isTrainingSet);
+     
+     // Print the result à la Weka explorer:
+     String strSummary = eTest.toSummaryString();
+     System.out.println(strSummary);
+     
+     // Get the confusion matrix
+     double[][] cmMatrix = eTest.confusionMatrix();
+     for(int row_i=0; row_i<cmMatrix.length; row_i++){
+       for(int col_i=0; col_i<cmMatrix.length; col_i++){
+         System.out.print(cmMatrix[row_i][col_i]);
+         System.out.print("|");
+       }
+       System.out.println();
+     }
+  }
+  
 void setup(){
+  try{
+    weka();
+  }
+  catch(Exception e){};
   //SMT and Processing setup
   values = loadJSONArray("cars.json");
-  removeElements();
+//  removeElements();
 //  println(values.size());
   size( displayWidth, displayHeight, SMT.RENDERER);
   SMT.init( this, TouchSource.AUTOMATIC);
-
+  
+  for(int i=0; i<values.size(); i++){
+    JSONObject car = values.getJSONObject(i);
+    SMT.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
+  }
+  
+  PieMenuZone menu = new PieMenuZone("PieMenu", 200, 400, 355);
+  menu.x = 1200;
+  SMT.add(menu);
+  menu.add("Forward",loadImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE_lpEhrobnGhxrMyF6TFLUuAcVpGJixDzak4TxVQjjiDW5UjF", "png"));
+  menu.add("Submenu");
+  menu.add("Add");
+  menu.add("View Source");
+  menu.setDisabled("View Source",true);
+  menu.add("Remove Self");
   //Make a new Zone
   //Zone circleZoneOne = new ShapeZone("CircleOne", 300, 200, 30, 30);
   //Zone circleZoneTwo = new ShapeZone("CircleTwo", 600, 400, 30, 30);
   //Zone circleZoneThree = new ShapeZone("CircleThree", 800, 600, 30, 30);
   //SMT.add(circleZoneOne, circleZoneTwo, circleZoneThree);
-  for(int i=0; i<values.size(); i++){
-    JSONObject car = values.getJSONObject(i);
-    SMT.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
-  }
+
   float[][] points = new float[3][2];
       
 points[0][0] = 325; // first point, x
@@ -45,7 +129,7 @@ myHull = new Hull( points );
 
 void removeElements(){
   JSONArray temp = new JSONArray();
-  for(int i=0; i<10; i++){
+  for(int i=0; i<50; i++){
     temp.append(values.getJSONObject(i));
   }
   values = temp;
@@ -90,14 +174,16 @@ void draw(){
   }
   if(activeZones != null){
     for(Zone z : activeZones){
-      CarZone cz = (CarZone)z;
-      text("Zone Name:"+cz.name, 100,170+c*20);
-      c++;
-      if(SMT.getUnassignedTouches().length == 2){
-        if(!assigned){
-          //assigned = true;
-          z.unassign(z.getActiveTouch(0));
-          SMT.assignTouches(z, SMT.getUnassignedTouches()[0], SMT.getUnassignedTouches()[1]);
+      if(z instanceof CarZone){
+        CarZone cz = (CarZone)z;
+        text("Zone Name:"+cz.name, 100,170+c*20);
+        c++;
+        if(SMT.getUnassignedTouches().length == 2){
+          if(!assigned){
+            //assigned = true;
+            z.unassign(z.getActiveTouch(0));
+            SMT.assignTouches(z, SMT.getUnassignedTouches()[0], SMT.getUnassignedTouches()[1]);
+          }
         }
       }
     }
@@ -165,4 +251,13 @@ float vAtan2cent180(PVector cent, PVector v2, PVector v1) {
   if (ang < 0) ang = TWO_PI + ang;
   ang-=PI;
   return ang;
+}
+
+void touchUpForward(){println("Forward");}
+void touchUpSubmenu(){println("Submenu");}
+void touchUpAdd(){println("Add");SMT.get("PieMenu",PieMenuZone.class).add("Remove Self");}
+void touchUpViewSource(){println("View Source");}
+void touchUpRemoveSelf(Zone z){println("Remove Self");SMT.get("PieMenu").remove(z);}
+void touchUpPieMenu(PieMenuZone m){
+  println("Selected: "+m.getSelectedName());
 }
