@@ -1,6 +1,8 @@
 class CanvasZone extends Zone {
   int count=0;
   Touch currentTouch = null;
+  ArrayList<PVector> currentEnclosing;
+  
   public CanvasZone(){
     super( "CanvasZone",0,0,displayWidth,displayHeight);
   }

@@ -19,10 +19,23 @@ class CarZone extends Zone {
   public void draw(){
     fill(carColor);
     rect(0, 0, 30, 30);
+    showText();
   }
   
+  
+  
   @Override
+  
   public void touch() {
     rst();
+  }
+  
+  private void showText(){
+    int temp = c;
+    for(Touch t : getTouches()){
+      text("Touch ID#"+t.sessionID+"x:"+t.x+"\ty:"+t.y+"Source: "+t.getTouchSource(),100-getLocalX(),170+c*20-getLocalY());
+      c++;
+    }
+    c = temp;
   }
 }
