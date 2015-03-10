@@ -57,7 +57,6 @@ void draw(){
   showFirstTouch();
   //show all current touches too
   text("All Touches: ",100,150);
-  c=0;
 
 //  MPolygon myRegion = myHull.getRegion();
 //  fill(255, 0, 0);

@@ -18,10 +18,34 @@ class CanvasZone extends Zone {
     }
   }
   
+  private void checkInHulls(Zone cz){    
+    for(Zone hz : SMT.getZones()){
+      if(hz instanceof HullZone){
+        if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX(), cz.getLocalY()))){
+          ((CarZone)cz).setInHull(true);
+          break;
+        }
+        else{
+          ((CarZone)cz).setInHull(false);
+        }
+      }
+    }
+  }
+  
+  private void showCarZonesInside(){
+    for(Zone z : SMT.getZones()){
+      if(z instanceof CarZone){
+        checkInHulls(z);
+      }
+    }
+  }
+  
   @Override
   public void draw(){
+    c=0;
     checkLongHold();
     showCurrentEnclosing();
+    showCarZonesInside();
   }
   
   @Override
@@ -119,38 +143,3 @@ class CanvasZone extends Zone {
     println("Selected: "+m.getSelectedName());
   }
 }
-
-//void touchDownParent(Zone z){ 
-   // Check out the gesture example for RST 
-   
-//   if(!(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y)){
-//     boundingHulls.add(new PVector(active.x, active.y));
-//   }
-//   else {
-//     count++;
-//   }
-////   println(active.getCurrentPoint().x+":"+active.getCurrentPoint().y+" - "+active.getLastPoint().x+":"+active.getLastPoint().y);
-//     println("Last"+active.getLastPoint());
-////   println(active.getTuioTime().getTotalMilliseconds());
-////   if(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y) count++;
-////   println(count);
-//   if(count > 10){
-////     println("SHOW PIE");
-//     PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
-//     if(m == null){
-//       addPieMenu(active);
-//     }
-//     count = 0;
-//   }
-//   println(SMT.getTouchesFromZone(z).length);
-//   println(SMT.getTouchesFromZone(z)[0].getSessionID());
-//}
-
-//void touchUpParent(Zone z){
-//  SMT.remove("PieMenu");
-//  println("Session ID Done: "+currentTouch.getSessionID());
-//  count = 0;
-   // Check out the gesture example for RST 
-//   println(SMT.getTouchesFromZone(z).length);
-//   println(SMT.getTouchesFromZone(z)[0].getTuioTime().getTotalMilliseconds() );
-//}

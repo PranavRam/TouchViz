@@ -19,7 +19,7 @@ class HullZone extends ShapeZone {
   
   @Override
   public void touch() {
-    rst();
+//    drag();
   }
   
   @Override
@@ -27,4 +27,23 @@ class HullZone extends ShapeZone {
 //    println("TOUCHED ME");
   }
   
+  @Override
+  public void touchUp(Touch t){
+  }
+  
+  @Override
+  public void translate( float x, float y){
+//    super.translate(x, y);
+    for(Vect2 v : vertices){
+      v.add(new Vect2(x,y));
+    }
+  }
+  
+  boolean pointInside(Vect2 point){
+    Vect2[] temp = new Vect2[vertices.size()];
+    for(int i=0; i<temp.length; i++){
+      temp[i] = vertices.get(i);
+    }
+    return Space2.insidePolygon(point, temp);
+  }
 }
