@@ -14,4 +14,15 @@ class CarZone extends Zone {
       random( displayWidth - 100),
       random( displayHeight - 100));
   }
+  
+  @Override
+  public void draw(){
+    fill(carColor);
+    rect(0, 0, 30, 30);
+  }
+  
+  @Override
+  public void touch() {
+    rst();
+  }
 }

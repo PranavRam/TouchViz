@@ -208,6 +208,7 @@ void draw(){
       }
     }
   }
+  checkActive();
   
 
 //  MPolygon myRegion = myHull.getRegion();
@@ -235,15 +236,6 @@ void showHullAroundPts(){
     fill(255, 0, 0);
     myRegion.draw(this);
   }
-}
-
-void drawCarZone(CarZone zone) {
-  fill(zone.carColor);
-  rect(0, 0, 30, 30);
-}
-
-void touchCarZone(CarZone zone) {
-  zone.rst();
 }
 
 boolean inPolyCheck(PVector v, ArrayList<PVector> p) {
@@ -285,35 +277,61 @@ void touchUpPieMenu(PieMenuZone m){
 void drawParent(Zone zone){
 //  background(255);
 }
+
+void touchParent(Zone z){
+  
+}
+
+void checkActive(){
+  if(currentTouch != null && currentTouch.isAssigned()){
+    count++;
+    if(count > 10 && currentTouch.getLastPoint() == null){
+      PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
+      if(m == null){
+       addPieMenu(currentTouch);
+      }
+    }
+  }
+}
+
 int count=0;
-void touchParent(Zone z){ 
+Touch currentTouch = null;
+void touchDownParent(Zone z){ 
    // Check out the gesture example for RST 
    int numTouches = z.getNumTouches();
    Touch active = z.getActiveTouch(numTouches-1);
-   if(!(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y)){
-     boundingHulls.add(new PVector(active.x, active.y));
+   currentTouch = active;
+   PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
+   if(m != null){
+     SMT.remove("PieMenu");
    }
-   else {
-     count++;
-   }
-//   println(active.getCurrentPoint().x+":"+active.getCurrentPoint().y+" - "+active.getLastPoint().x+":"+active.getLastPoint().y);
-     println("Last"+active.getLastPoint());
-//   println(active.getTuioTime().getTotalMilliseconds());
-//   if(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y) count++;
-//   println(count);
-   if(count > 10){
-//     println("SHOW PIE");
-     PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
-     if(m == null){
-       addPieMenu(active);
-     }
-     count = 0;
-   }
+//   if(!(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y)){
+//     boundingHulls.add(new PVector(active.x, active.y));
+//   }
+//   else {
+//     count++;
+//   }
+////   println(active.getCurrentPoint().x+":"+active.getCurrentPoint().y+" - "+active.getLastPoint().x+":"+active.getLastPoint().y);
+//     println("Last"+active.getLastPoint());
+////   println(active.getTuioTime().getTotalMilliseconds());
+////   if(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y) count++;
+////   println(count);
+//   if(count > 10){
+////     println("SHOW PIE");
+//     PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
+//     if(m == null){
+//       addPieMenu(active);
+//     }
+//     count = 0;
+//   }
 //   println(SMT.getTouchesFromZone(z).length);
 //   println(SMT.getTouchesFromZone(z)[0].getSessionID());
 }
-void touchDownParent(Zone z){
-  SMT.remove("PieMenu");
+
+void touchUpParent(Zone z){
+//  SMT.remove("PieMenu");
+  println("Session ID Done: "+currentTouch.getSessionID());
+  count = 0;
    // Check out the gesture example for RST 
 //   println(SMT.getTouchesFromZone(z).length);
 //   println(SMT.getTouchesFromZone(z)[0].getTuioTime().getTotalMilliseconds() );
