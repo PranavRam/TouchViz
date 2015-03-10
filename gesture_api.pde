@@ -21,86 +21,11 @@ ArrayList<PVector> zoneLocations;
 JSONArray values;
 ArrayList<PVector> boundingHulls;
 
-public void weka() throws Exception{
-    
-     // Declare two numeric attributes
-     Attribute Attribute1 = new Attribute("firstNumeric");
-     Attribute Attribute2 = new Attribute("secondNumeric");
-     
-     // Declare a nominal attribute along with its values
-     FastVector fvNominalVal = new FastVector(3);
-     fvNominalVal.addElement("blue");
-     fvNominalVal.addElement("gray");
-     fvNominalVal.addElement("black");
-     Attribute Attribute3 = new Attribute("aNominal", fvNominalVal);
-     
-     // Declare the class attribute along with its values
-     FastVector fvClassVal = new FastVector(2);
-     fvClassVal.addElement("positive");
-     fvClassVal.addElement("negative");
-     Attribute ClassAttribute = new Attribute("theClass", fvClassVal);
-     
-     // Declare the feature vector
-     FastVector fvWekaAttributes = new FastVector(4);
-     fvWekaAttributes.addElement(Attribute1);    
-     fvWekaAttributes.addElement(Attribute2);    
-     fvWekaAttributes.addElement(Attribute3);    
-     fvWekaAttributes.addElement(ClassAttribute);
-     
-     // Create an empty training set
-     Instances isTrainingSet = new Instances("Rel", fvWekaAttributes, 10);       
-     
-     // Set class index
-     isTrainingSet.setClassIndex(3);
-     
-     // Create the instance
-     Instance iExample = new Instance(4);
-     iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), 1.0);      
-     iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), 0.5);      
-     iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), "gray");
-     iExample.setValue((Attribute)fvWekaAttributes.elementAt(3), "positive");
-     
-     // add the instance
-     isTrainingSet.add(iExample);
-     Classifier cModel = (Classifier)new NaiveBayes();   
-     cModel.buildClassifier(isTrainingSet);
-
-     // Test the model
-     Evaluation eTest = new Evaluation(isTrainingSet);
-     eTest.evaluateModel(cModel, isTrainingSet);
-     
-     // Print the result à la Weka explorer:
-     String strSummary = eTest.toSummaryString();
-     System.out.println(strSummary);
-     
-     // Get the confusion matrix
-     double[][] cmMatrix = eTest.confusionMatrix();
-     for(int row_i=0; row_i<cmMatrix.length; row_i++){
-       for(int col_i=0; col_i<cmMatrix.length; col_i++){
-         System.out.print(cmMatrix[row_i][col_i]);
-         System.out.print("|");
-       }
-       System.out.println();
-     }
-  }
-
-void addPieMenu(Touch t){
-  SMT.remove("PieMenu");
-  PieMenuZone menu = new PieMenuZone("PieMenu", 200, (int)t.getX(), (int)t.getY());
-  SMT.add(menu);
-  menu.add("Forward",loadImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE_lpEhrobnGhxrMyF6TFLUuAcVpGJixDzak4TxVQjjiDW5UjF", "png"));
-  menu.add("Submenu");
-  menu.add("Add");
-  menu.add("View Source");
-  menu.setDisabled("View Source",true);
-  menu.add("Remove Self");
-}
-
 void setup(){
-  try{
-    weka();
-  }
-  catch(Exception e){};
+//  try{
+//    weka();
+//  }
+//  catch(Exception e){};
   boundingHulls = new ArrayList<PVector>();
   
   //SMT and Processing setup
@@ -109,29 +34,13 @@ void setup(){
 //  println(values.size());
   size( displayWidth, displayHeight, SMT.RENDERER);
   SMT.init( this, TouchSource.AUTOMATIC);
-  Zone zone = new Zone("Parent",0,0,displayWidth,displayHeight);
+  CanvasZone canvas = new CanvasZone();
   for(int i=0; i<values.size(); i++){
     JSONObject car = values.getJSONObject(i);
-    zone.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
+    canvas.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
   }
-  SMT.add(zone);
-  
-  //Make a new Zone
-  //Zone circleZoneOne = new ShapeZone("CircleOne", 300, 200, 30, 30);
-  //Zone circleZoneTwo = new ShapeZone("CircleTwo", 600, 400, 30, 30);
-  //Zone circleZoneThree = new ShapeZone("CircleThree", 800, 600, 30, 30);
-  //SMT.add(circleZoneOne, circleZoneTwo, circleZoneThree);
-
-  float[][] points = new float[3][2];
-      
-points[0][0] = 325; // first point, x
-points[0][1] = 225; // first point, y
-points[1][0] = 625; // second point, x
-points[1][1] = 425; // second point, y
-points[2][0] = 825; // third point, x
-points[2][1] = 625; // third point, y
-zoneLocations = new ArrayList<PVector>();
-myHull = new Hull( points );
+  SMT.add(canvas);
+  zoneLocations = new ArrayList<PVector>();
 }
 
 void removeElements(){
@@ -208,8 +117,6 @@ void draw(){
       }
     }
   }
-  checkActive();
-  
 
 //  MPolygon myRegion = myHull.getRegion();
 //  fill(255, 0, 0);
@@ -263,76 +170,4 @@ float vAtan2cent180(PVector cent, PVector v2, PVector v1) {
   if (ang < 0) ang = TWO_PI + ang;
   ang-=PI;
   return ang;
-}
-
-void touchUpForward(){println("Forward");}
-void touchUpSubmenu(){println("Submenu");}
-void touchUpAdd(){println("Add");SMT.get("PieMenu",PieMenuZone.class).add("Remove Self");}
-void touchUpViewSource(){println("View Source");}
-void touchUpRemoveSelf(Zone z){println("Remove Self");SMT.get("PieMenu").remove(z);}
-void touchUpPieMenu(PieMenuZone m){
-  println("Selected: "+m.getSelectedName());
-}
-
-void drawParent(Zone zone){
-//  background(255);
-}
-
-void touchParent(Zone z){
-  
-}
-
-void checkActive(){
-  if(currentTouch != null && currentTouch.isAssigned()){
-    count++;
-    if(count > 10 && currentTouch.getLastPoint() == null){
-      PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
-      if(m == null){
-       addPieMenu(currentTouch);
-      }
-    }
-  }
-}
-
-int count=0;
-Touch currentTouch = null;
-void touchDownParent(Zone z){ 
-   // Check out the gesture example for RST 
-   int numTouches = z.getNumTouches();
-   Touch active = z.getActiveTouch(numTouches-1);
-   currentTouch = active;
-   PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
-   if(m != null){
-     SMT.remove("PieMenu");
-   }
-//   if(!(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y)){
-//     boundingHulls.add(new PVector(active.x, active.y));
-//   }
-//   else {
-//     count++;
-//   }
-////   println(active.getCurrentPoint().x+":"+active.getCurrentPoint().y+" - "+active.getLastPoint().x+":"+active.getLastPoint().y);
-//     println("Last"+active.getLastPoint());
-////   println(active.getTuioTime().getTotalMilliseconds());
-////   if(active.getCurrentPoint().x == active.getLastPoint().x && active.getCurrentPoint().y == active.getLastPoint().y) count++;
-////   println(count);
-//   if(count > 10){
-////     println("SHOW PIE");
-//     PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
-//     if(m == null){
-//       addPieMenu(active);
-//     }
-//     count = 0;
-//   }
-//   println(SMT.getTouchesFromZone(z).length);
-//   println(SMT.getTouchesFromZone(z)[0].getSessionID());
-}
-
-void touchUpParent(Zone z){
-//  SMT.remove("PieMenu");
-  println("Session ID Done: "+currentTouch.getSessionID());
-  count = 0;
-   // Check out the gesture example for RST 
-//   println(SMT.getTouchesFromZone(z).length);
-//   println(SMT.getTouchesFromZone(z)[0].getTuioTime().getTotalMilliseconds() );
 }
