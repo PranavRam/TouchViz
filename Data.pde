@@ -12,11 +12,4 @@ class Data {
     }
     values = temp;
   }
-  
-  public void addTo(Zone zone){
-    for(int i=0; i<values.size(); i++){
-      JSONObject car = values.getJSONObject(i);
-      zone.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
-    }
-  }
 }

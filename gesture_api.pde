@@ -1,3 +1,5 @@
+import point2line.*;
+
 import megamu.mesh.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -18,20 +20,18 @@ Hull myHull;
 Touch first=null;
 boolean assigned = false;
 ArrayList<PVector> zoneLocations;
-Data data;
+
 int c = 0;
 
 void setup(){
-  boundingHulls = new ArrayList<PVector>();
   zoneLocations = new ArrayList<PVector>();
-  data = new Data("cars.json");
   
   //SMT and Processing setup
   size( displayWidth, displayHeight, SMT.RENDERER);
   SMT.init( this, TouchSource.AUTOMATIC);
   
   CanvasZone canvas = new CanvasZone();
-  data.addTo(canvas);
+  
   SMT.add(canvas);
 }
 
