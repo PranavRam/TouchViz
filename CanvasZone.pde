@@ -1,8 +1,16 @@
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
+
 class CanvasZone extends Zone {
   int count=0;
   Data data;
   Touch currentTouch = null;
   ArrayList<Vect2> currentEnclosing;
+  HashMap<Long, ArrayList<Touch>> touchTimeMap= new HashMap<Long, ArrayList<Touch>>();
+  Map map = Collections.synchronizedMap(touchTimeMap);
   
   public CanvasZone(){
     super( "CanvasZone",0,0,displayWidth,displayHeight);
@@ -40,16 +48,89 @@ class CanvasZone extends Zone {
     }
   }
   
+  private void showTouchPoints(){
+    Set set = map.entrySet();
+    synchronized (map) {
+        Iterator i = set.iterator();
+         // Display elements
+        while(i.hasNext()) {
+           Map.Entry me = (Map.Entry)i.next();
+           ArrayList<Touch> list = (ArrayList<Touch>)me.getValue();
+           if(list.size() < 5) continue;
+           fill(255);
+           for(Touch t : list){
+             ellipse(t.getX(), t.getY(),50,50);
+           }
+//           System.out.print(me.getKey() + ": ");
+//           System.out.println(me.getValue());
+        }
+      }
+  }
+  
   @Override
   public void draw(){
     c=0;
     checkLongHold();
     showCurrentEnclosing();
     showCarZonesInside();
+    showTouchPoints();
   }
   
   @Override
   public void touch() {
+  }
+  
+  private boolean addTouchToCurrentList(ArrayList<Touch> list, Touch t){
+    boolean shouldAdd = false;
+    long currentStartTouchTime = t.startTime.getTotalMilliseconds();
+    for(Touch ct : list){
+      long startTouchTime = ct.startTime.getTotalMilliseconds();
+      if(Math.abs(startTouchTime - currentStartTouchTime) < 5000){
+        shouldAdd = true;
+      }
+      else {
+        shouldAdd = false;
+      }
+    }
+    return shouldAdd;
+  }
+  
+  private void addTouchToMap(Touch t){
+    if(touchTimeMap.isEmpty()){
+      ArrayList<Touch> temp = new ArrayList<Touch>();
+      temp.add(t);
+      synchronized (map) {
+          Long key = t.getSessionID();
+          map.put(key, temp);
+      }
+    }
+    else {
+      Set set = map.entrySet();
+      boolean addNewEntry = false;
+      synchronized (map) {
+        Iterator i = set.iterator();
+         // Display elements
+        while(i.hasNext()) {
+           Map.Entry me = (Map.Entry)i.next();
+//           System.out.print(me.getKey() + ": ");
+//           System.out.println(me.getValue());
+             if(addTouchToCurrentList((ArrayList<Touch>)me.getValue(), t)){
+               ((ArrayList<Touch>)me.getValue()).add(t);
+               addNewEntry = false;
+               break;
+             }
+             else {
+               addNewEntry = true;
+             }
+        }
+        if(addNewEntry){
+          ArrayList<Touch> temp = new ArrayList<Touch>();
+          temp.add(t);
+          Long key = t.getSessionID();
+          map.put(key, temp);
+        }
+      }
+    }
   }
   
   @Override
@@ -60,6 +141,7 @@ class CanvasZone extends Zone {
     if(m != null){
       SMT.remove("PieMenu");
     }
+    addTouchToMap(t);
   }
   
   @Override
