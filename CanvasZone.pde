@@ -29,7 +29,7 @@ class CanvasZone extends Zone {
   private void checkInHulls(Zone cz){    
     for(Zone hz : SMT.getZones()){
       if(hz instanceof HullZone){
-        if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX(), cz.getLocalY()))){
+        if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
           ((CarZone)cz).setInHull(true);
           break;
         }
@@ -80,6 +80,14 @@ class CanvasZone extends Zone {
   public void touch() {
   }
   
+  private float[][] getFloatPoints(ArrayList<Touch> touchPoints){
+    return null
+  }
+  
+  private void reorderTouchPoints(ArrayList<Touch> touchPoints){
+    float[][] pointsToFloat = getFloatPoints(touchPoints);
+  }
+  
   private boolean addTouchToCurrentList(ArrayList<Touch> list, Touch t){
     boolean shouldAdd = false;
     long currentStartTouchTime = t.startTime.getTotalMilliseconds();
@@ -116,6 +124,7 @@ class CanvasZone extends Zone {
 //           System.out.println(me.getValue());
              if(addTouchToCurrentList((ArrayList<Touch>)me.getValue(), t)){
                ((ArrayList<Touch>)me.getValue()).add(t);
+               reorderTouchPoints((ArrayList<Touch>)me.getValue())
                addNewEntry = false;
                break;
              }
@@ -144,6 +153,27 @@ class CanvasZone extends Zone {
     addTouchToMap(t);
   }
   
+  private void clearInActiveTouches(){
+    Set set = map.entrySet();
+    synchronized (map) {
+      Iterator i = set.iterator();
+       // Display elements
+      while(i.hasNext()) {
+         Map.Entry me = (Map.Entry)i.next();
+//           System.out.print(me.getKey() + ": ");
+//           System.out.println(me.getValue());
+         ArrayList<Touch> temp = (ArrayList<Touch>)me.getValue();
+         Iterator j = temp.iterator();
+         while(j.hasNext()){
+           Touch current = (Touch)j.next();
+           if(!current.isAssigned()){
+             j.remove();
+           }
+         }
+      }
+    }
+  }
+  
   @Override
   public void touchUp(Touch t){
     count = 0;
@@ -153,6 +183,7 @@ class CanvasZone extends Zone {
       putCarZoneOnTop();
     }
     currentEnclosing.clear();
+    clearInActiveTouches();
   }
   
   @Override
