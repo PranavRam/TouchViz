@@ -81,11 +81,24 @@ class CanvasZone extends Zone {
   }
   
   private float[][] getFloatPoints(ArrayList<Touch> touchPoints){
-    return null
+    float[][] points = new float[touchPoints.size()][2];
+    for(int i=0; i<touchPoints.size(); i++){
+      points[i][0] = touchPoints.get(i).getX();
+      points[i][1] = touchPoints.get(i).getY();
+    }
+    return points;
   }
   
   private void reorderTouchPoints(ArrayList<Touch> touchPoints){
     float[][] pointsToFloat = getFloatPoints(touchPoints);
+    Hull myHull = new Hull( pointsToFloat );
+    int[] extrema = myHull.getExtrema();
+    println( extrema );
+    ArrayList<Touch> temp = new ArrayList<Touch>();
+    for(int i=0; i<touchPoints.size(); i++){
+      temp.add(touchPoints.get(extrema[i]));
+    }
+    touchPoints = temp;
   }
   
   private boolean addTouchToCurrentList(ArrayList<Touch> list, Touch t){
@@ -124,7 +137,7 @@ class CanvasZone extends Zone {
 //           System.out.println(me.getValue());
              if(addTouchToCurrentList((ArrayList<Touch>)me.getValue(), t)){
                ((ArrayList<Touch>)me.getValue()).add(t);
-               reorderTouchPoints((ArrayList<Touch>)me.getValue())
+               reorderTouchPoints((ArrayList<Touch>)me.getValue());
                addNewEntry = false;
                break;
              }
