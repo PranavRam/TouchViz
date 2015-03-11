@@ -137,9 +137,9 @@ class CanvasZone extends Zone {
   public void touchDown(Touch t){
     int numTouches = getNumTouches();
     currentTouch = getActiveTouch(numTouches-1);
-    PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
+    CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
     if(m != null){
-      SMT.remove("PieMenu");
+      SMT.remove("CarPieMenu");
     }
     addTouchToMap(t);
   }
@@ -157,7 +157,7 @@ class CanvasZone extends Zone {
   
   @Override
   public void touchMoved(Touch t){
-    if(t.getPath().length > 1){
+    if(t.getPath().length > 1 && getTouches().length == 1){
 //    if(t.getSessionID() == currentTouch.getSessionID() && t.getLastPoint() == null){
 //      println("MOVED: "+t.getX()+":"+t.getY());
 //      println(t.getLastPoint());
@@ -197,7 +197,7 @@ class CanvasZone extends Zone {
     if(currentTouch != null && currentTouch.isAssigned()){
       count++;
       if(count > 10 && currentTouch.getLastPoint() == null){
-        PieMenuZone m = SMT.get("PieMenu",PieMenuZone.class);
+        CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
         if(m == null){
          addPieMenu(currentTouch);
         }
@@ -205,23 +205,8 @@ class CanvasZone extends Zone {
     }
   }
   private void addPieMenu(Touch t){
-    SMT.remove("PieMenu");
-    PieMenuZone menu = new PieMenuZone("PieMenu", 200, (int)t.getX(), (int)t.getY());
+    SMT.remove("CarPieMenu");
+    CarPieMenuZone menu = new CarPieMenuZone((int)t.getX(), (int)t.getY());
     SMT.add(menu);
-    menu.add("Forward",loadImage("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE_lpEhrobnGhxrMyF6TFLUuAcVpGJixDzak4TxVQjjiDW5UjF", "png"));
-    menu.add("Submenu");
-    menu.add("Add");
-    menu.add("View Source");
-    menu.setDisabled("View Source",true);
-    menu.add("Remove Self");
-  }
-  
-  void touchUpForward(){println("Forward");}
-  void touchUpSubmenu(){println("Submenu");}
-  void touchUpAdd(){println("Add");SMT.get("PieMenu",PieMenuZone.class).add("Remove Self");}
-  void touchUpViewSource(){println("View Source");}
-  void touchUpRemoveSelf(Zone z){println("Remove Self");SMT.get("PieMenu").remove(z);}
-  void touchUpPieMenu(PieMenuZone m){
-    println("Selected: "+m.getSelectedName());
   }
 }
