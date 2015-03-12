@@ -200,7 +200,7 @@ class CanvasZone extends Zone {
       putCarZoneOnTop();
     }
     currentEnclosing.clear();
-//    clearInActiveTouches();
+    clearInActiveTouches();
   }
   
   @Override
@@ -244,7 +244,7 @@ class CanvasZone extends Zone {
   private void checkLongHold(){
     if(currentTouch != null && currentTouch.isAssigned()){
       count++;
-      if(count > 10 && currentTouch.getLastPoint() == null){
+      if(count > 10 && currentTouch.getLastPoint() == null && carZoneActive()){
         CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
         if(m == null){
          addPieMenu(currentTouch);
@@ -261,5 +261,13 @@ class CanvasZone extends Zone {
   @Override
   public void press(Touch t){
     println("Pressed");
+  }
+  
+  private boolean carZoneActive(){
+    for(Zone z : SMT.getActiveZones()){
+      if(z instanceof CarZone) return true;
+    }
+    
+    return false;
   }
 }
