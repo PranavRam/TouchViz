@@ -10,7 +10,7 @@ class CanvasZone extends Zone {
   Data data;
   Touch currentTouch = null;
   Vector<Vect2> currentEnclosing;
-  HashMap<Long, ArrayList<Touch>> touchTimeMap= new HashMap<Long, ArrayList<Touch>>();
+  HashMap<Long, Vector<Touch>> touchTimeMap= new HashMap<Long, Vector<Touch>>();
   Map map = Collections.synchronizedMap(touchTimeMap);
   
   public CanvasZone(){
@@ -56,7 +56,7 @@ class CanvasZone extends Zone {
          // Display elements
         while(i.hasNext()) {
            Map.Entry me = (Map.Entry)i.next();
-           ArrayList<Touch> list = (ArrayList<Touch>)me.getValue();
+           Vector<Touch> list = (Vector<Touch>)me.getValue();
            if(list.size() < 5) continue;
            fill(255);
            beginShape();
@@ -84,7 +84,7 @@ class CanvasZone extends Zone {
   public void touch() {
   }
   
-  private float[][] getFloatPoints(ArrayList<Touch> touchPoints){
+  private float[][] getFloatPoints(Vector<Touch> touchPoints){
     float[][] points = new float[touchPoints.size()][2];
     for(int i=0; i<touchPoints.size(); i++){
       points[i][0] = touchPoints.get(i).getX();
@@ -93,12 +93,12 @@ class CanvasZone extends Zone {
     return points;
   }
   
-  private void reorderTouchPoints(ArrayList<Touch> touchPoints, Map.Entry entry){
+  private void reorderTouchPoints(Vector<Touch> touchPoints, Map.Entry entry){
     float[][] pointsToFloat = getFloatPoints(touchPoints);
     Hull myHull = new Hull( pointsToFloat );
     int[] extrema = myHull.getExtrema();
 //    println( extrema );
-    ArrayList<Touch> temp = new ArrayList<Touch>();
+    Vector<Touch> temp = new Vector<Touch>();
     for(int i=0; i<touchPoints.size(); i++){
       temp.add(touchPoints.get(extrema[i]));
     }
@@ -106,7 +106,7 @@ class CanvasZone extends Zone {
 //    touchPoints = temp;
   }
   
-  private boolean addTouchToCurrentList(ArrayList<Touch> list, Touch t){
+  private boolean addTouchToCurrentList(Vector<Touch> list, Touch t){
     boolean shouldAdd = false;
     long currentStartTouchTime = t.startTime.getTotalMilliseconds();
     for(Touch ct : list){
@@ -123,7 +123,7 @@ class CanvasZone extends Zone {
   
   private void addTouchToMap(Touch t){
     if(touchTimeMap.isEmpty()){
-      ArrayList<Touch> temp = new ArrayList<Touch>();
+      Vector<Touch> temp = new Vector<Touch>();
       temp.add(t);
       synchronized (map) {
           Long key = t.getSessionID();
@@ -140,9 +140,9 @@ class CanvasZone extends Zone {
            Map.Entry me = (Map.Entry)i.next();
 //           System.out.print(me.getKey() + ": ");
 //           System.out.println(me.getValue());
-             if(addTouchToCurrentList((ArrayList<Touch>)me.getValue(), t)){
-               ((ArrayList<Touch>)me.getValue()).add(t);
-               reorderTouchPoints((ArrayList<Touch>)me.getValue(), me);
+             if(addTouchToCurrentList((Vector<Touch>)me.getValue(), t)){
+               ((Vector<Touch>)me.getValue()).add(t);
+               reorderTouchPoints((Vector<Touch>)me.getValue(), me);
                addNewEntry = false;
                break;
              }
@@ -151,7 +151,7 @@ class CanvasZone extends Zone {
              }
         }
         if(addNewEntry){
-          ArrayList<Touch> temp = new ArrayList<Touch>();
+          Vector<Touch> temp = new Vector<Touch>();
           temp.add(t);
           Long key = t.getSessionID();
           map.put(key, temp);
@@ -180,7 +180,7 @@ class CanvasZone extends Zone {
          Map.Entry me = (Map.Entry)i.next();
 //           System.out.print(me.getKey() + ": ");
 //           System.out.println(me.getValue());
-         ArrayList<Touch> temp = (ArrayList<Touch>)me.getValue();
+         Vector<Touch> temp = (Vector<Touch>)me.getValue();
          Iterator j = temp.iterator();
          while(j.hasNext()){
            Touch current = (Touch)j.next();
@@ -200,19 +200,22 @@ class CanvasZone extends Zone {
       this.add(new HullZone(currentEnclosing));
       putCarZoneOnTop();
     }
-    currentEnclosing.clear();
+    synchronized(this.currentEnclosing){
+      currentEnclosing.clear();
+    }
     clearInActiveTouches();
   }
   
-  @Override
-  public void touchMoved(Touch t){
-    if(t.getPath().length > 1 && getTouches().length == 1){
-//    if(t.getSessionID() == currentTouch.getSessionID() && t.getLastPoint() == null){
-      println("MOVED: "+t.getX()+":"+t.getY());
-      println(t.getLastPoint());
-      currentEnclosing.add(new Vect2(t.getX(), t.getY()));
-    }
-  }
+//  @Override
+//  public void touchMoved(Touch t){
+//    if(t.getPath().length > 1 && getTouches().length == 1){
+////    if(t.getSessionID() == currentTouch.getSessionID() && t.getLastPoint() == null){
+//      println("MOVED: "+t.getX()+":"+t.getY());
+//      println(t.getLastPoint());
+//      currentEnclosing.add(new Vect2(t.getX(), t.getY()));
+//      }
+//    }
+//  }
   
   
   private void putCarZoneOnTop(){
@@ -224,36 +227,62 @@ class CanvasZone extends Zone {
   }
   
   private boolean shouldAddHull(){
-    if(currentEnclosing == null || currentEnclosing.size() < 5) return false;
-    
-    Vect2 first = new Vect2(currentEnclosing.get(0));
-    Vect2 second = new Vect2(currentEnclosing.get(currentEnclosing.size()-1));
-//    println(currentEnclosing.size());
-    return Vect2.distance(first, second) < 60;
+    synchronized(this.currentEnclosing){
+      if(currentEnclosing == null || currentEnclosing.size() < 5) return false;
+      
+      Vect2 first = new Vect2(currentEnclosing.get(0));
+      Vect2 second = new Vect2(currentEnclosing.get(currentEnclosing.size()-1));
+  //    println(currentEnclosing.size());
+      return Vect2.distance(first, second) < 60;
+    }
   }
   
   private void showCurrentEnclosing(){
-    stroke(255);
-    beginShape(LINES);
-    for(Vect2 pv : currentEnclosing){
-      vertex(pv.x, pv.y);
+    synchronized(this.currentEnclosing){
+      stroke(255);
+      beginShape(LINES);
+      for(Vect2 pv : currentEnclosing){
+        vertex(pv.x, pv.y);
+      }
+      endShape();
+      stroke(0);
     }
-    endShape();
-    stroke(0);
   }
   
   private void checkLongHold(){
-    if(currentTouch != null && currentTouch.isAssigned()){
-      Long time = currentTouch.currentTime.getTotalMilliseconds() - currentTouch.startTime.getTotalMilliseconds();
-      println(time);
-      if(time > 1000 && carZoneActive()){
-//        println("ACTIVE");
-        CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
-        if(m == null){
-         addPieMenu(currentTouch);
-        }
+    Set set = map.entrySet();
+    synchronized (map) {
+      Iterator i = set.iterator();
+       // Display elements
+      while(i.hasNext()) {
+         Map.Entry me = (Map.Entry)i.next();
+//           System.out.print(me.getKey() + ": ");
+//           System.out.println(me.getValue());
+         Vector<Touch> temp = (Vector<Touch>)me.getValue();
+         if(temp.size() == 1){
+           Long time = temp.get(0).currentTime.getTotalMilliseconds() - temp.get(0).startTime.getTotalMilliseconds();
+            println(time);
+            if(time > 1000 && carZoneActive()){
+      //        println("ACTIVE");
+              CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
+              if(m == null){
+               addPieMenu(temp.get(0));
+              }
+            }
+         }
       }
     }
+//    if(currentTouch != null && currentTouch.isAssigned()){
+//      Long time = currentTouch.currentTime.getTotalMilliseconds() - currentTouch.startTime.getTotalMilliseconds();
+//      println(time);
+//      if(time > 1000 && carZoneActive()){
+////        println("ACTIVE");
+//        CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
+//        if(m == null){
+//         addPieMenu(currentTouch);
+//        }
+//      }
+//    }
   }
   private void addPieMenu(Touch t){
     SMT.remove("CarPieMenu");
