@@ -58,9 +58,12 @@ class CanvasZone extends Zone {
            ArrayList<Touch> list = (ArrayList<Touch>)me.getValue();
            if(list.size() < 5) continue;
            fill(255);
+           beginShape();
            for(Touch t : list){
-             ellipse(t.getX(), t.getY(),50,50);
+//             ellipse(t.getX(), t.getY(),50,50);
+              vertex(t.getX(), t.getY());
            }
+           endShape(CLOSE);
 //           System.out.print(me.getKey() + ": ");
 //           System.out.println(me.getValue());
         }
@@ -89,7 +92,7 @@ class CanvasZone extends Zone {
     return points;
   }
   
-  private void reorderTouchPoints(ArrayList<Touch> touchPoints){
+  private void reorderTouchPoints(ArrayList<Touch> touchPoints, Map.Entry entry){
     float[][] pointsToFloat = getFloatPoints(touchPoints);
     Hull myHull = new Hull( pointsToFloat );
     int[] extrema = myHull.getExtrema();
@@ -98,7 +101,8 @@ class CanvasZone extends Zone {
     for(int i=0; i<touchPoints.size(); i++){
       temp.add(touchPoints.get(extrema[i]));
     }
-    touchPoints = temp;
+    entry.setValue(temp);
+//    touchPoints = temp;
   }
   
   private boolean addTouchToCurrentList(ArrayList<Touch> list, Touch t){
@@ -137,7 +141,7 @@ class CanvasZone extends Zone {
 //           System.out.println(me.getValue());
              if(addTouchToCurrentList((ArrayList<Touch>)me.getValue(), t)){
                ((ArrayList<Touch>)me.getValue()).add(t);
-               reorderTouchPoints((ArrayList<Touch>)me.getValue());
+               reorderTouchPoints((ArrayList<Touch>)me.getValue(), me);
                addNewEntry = false;
                break;
              }
@@ -196,7 +200,7 @@ class CanvasZone extends Zone {
       putCarZoneOnTop();
     }
     currentEnclosing.clear();
-    clearInActiveTouches();
+//    clearInActiveTouches();
   }
   
   @Override
@@ -252,5 +256,10 @@ class CanvasZone extends Zone {
     SMT.remove("CarPieMenu");
     CarPieMenuZone menu = new CarPieMenuZone((int)t.getX(), (int)t.getY());
     SMT.add(menu);
+  }
+  
+  @Override
+  public void press(Touch t){
+    println("Pressed");
   }
 }
