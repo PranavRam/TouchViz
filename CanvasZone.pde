@@ -206,8 +206,9 @@ class CanvasZone extends Zone {
     clearInActiveTouches();
   }
   
-//  @Override
-//  public void touchMoved(Touch t){
+  @Override
+  public void touchMoved(Touch t){
+    addMovedTouchPoints(t);
 //    if(t.getPath().length > 1 && getTouches().length == 1){
 ////    if(t.getSessionID() == currentTouch.getSessionID() && t.getLastPoint() == null){
 //      println("MOVED: "+t.getX()+":"+t.getY());
@@ -215,8 +216,27 @@ class CanvasZone extends Zone {
 //      currentEnclosing.add(new Vect2(t.getX(), t.getY()));
 //      }
 //    }
-//  }
+  }
   
+  private void addMovedTouchPoints(Touch touch){
+    Set set = map.entrySet();
+    synchronized (map) {
+      Iterator i = set.iterator();
+       // Display elements
+      while(i.hasNext()) {
+         Map.Entry me = (Map.Entry)i.next();
+//           System.out.print(me.getKey() + ": ");
+//           System.out.println(me.getValue());
+         Vector<Touch> temp = (Vector<Touch>)me.getValue();
+         if(temp.size() == 1 && touch.getSessionID() == temp.get(0).getSessionID()){
+           Touch t = temp.get(0);
+           if(t.getPath().length > 10){
+             currentEnclosing.add(new Vect2(t.getX(), t.getY()));
+           }
+         }
+      }
+    }
+  }
   
   private void putCarZoneOnTop(){
     for(Zone z : SMT.getZones()){
