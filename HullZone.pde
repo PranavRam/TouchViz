@@ -1,8 +1,8 @@
 class HullZone extends ShapeZone {
-  ArrayList<Vect2> vertices;
-  public HullZone(ArrayList<Vect2> vertices){
+  Vector<Vect2> vertices;
+  public HullZone(Vector<Vect2> vertices){
     super("HullZone");
-    this.vertices = new ArrayList(vertices);
+    this.vertices = new Vector(vertices);
   }
   
   @Override

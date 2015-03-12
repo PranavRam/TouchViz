@@ -3,18 +3,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.*;
 
 class CanvasZone extends Zone {
   int count=0;
   Data data;
   Touch currentTouch = null;
-  ArrayList<Vect2> currentEnclosing;
+  Vector<Vect2> currentEnclosing;
   HashMap<Long, ArrayList<Touch>> touchTimeMap= new HashMap<Long, ArrayList<Touch>>();
   Map map = Collections.synchronizedMap(touchTimeMap);
   
   public CanvasZone(){
     super( "CanvasZone",0,0,displayWidth,displayHeight);
-    currentEnclosing = new ArrayList<Vect2>();
+    currentEnclosing = new Vector<Vect2>();
     data = new Data("cars.json");
     addData();
   }
@@ -96,7 +97,7 @@ class CanvasZone extends Zone {
     float[][] pointsToFloat = getFloatPoints(touchPoints);
     Hull myHull = new Hull( pointsToFloat );
     int[] extrema = myHull.getExtrema();
-    println( extrema );
+//    println( extrema );
     ArrayList<Touch> temp = new ArrayList<Touch>();
     for(int i=0; i<touchPoints.size(); i++){
       temp.add(touchPoints.get(extrema[i]));
@@ -110,7 +111,7 @@ class CanvasZone extends Zone {
     long currentStartTouchTime = t.startTime.getTotalMilliseconds();
     for(Touch ct : list){
       long startTouchTime = ct.startTime.getTotalMilliseconds();
-      if(Math.abs(startTouchTime - currentStartTouchTime) < 5000){
+      if(Math.abs(startTouchTime - currentStartTouchTime) < 2000){
         shouldAdd = true;
       }
       else {
@@ -207,8 +208,8 @@ class CanvasZone extends Zone {
   public void touchMoved(Touch t){
     if(t.getPath().length > 1 && getTouches().length == 1){
 //    if(t.getSessionID() == currentTouch.getSessionID() && t.getLastPoint() == null){
-//      println("MOVED: "+t.getX()+":"+t.getY());
-//      println(t.getLastPoint());
+      println("MOVED: "+t.getX()+":"+t.getY());
+      println(t.getLastPoint());
       currentEnclosing.add(new Vect2(t.getX(), t.getY()));
     }
   }
@@ -243,8 +244,10 @@ class CanvasZone extends Zone {
   
   private void checkLongHold(){
     if(currentTouch != null && currentTouch.isAssigned()){
-      count++;
-      if(count > 10 && currentTouch.getLastPoint() == null && carZoneActive()){
+      Long time = currentTouch.currentTime.getTotalMilliseconds() - currentTouch.startTime.getTotalMilliseconds();
+      println(time);
+      if(time > 1000 && carZoneActive()){
+//        println("ACTIVE");
         CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
         if(m == null){
          addPieMenu(currentTouch);
