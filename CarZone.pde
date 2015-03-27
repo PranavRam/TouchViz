@@ -4,17 +4,32 @@ class CarZone extends Zone {
   public String bodyStyle;
   public color carColor;
   public boolean inHull = false;
-  public CarZone(String bodyStyle, String cylinderNum){
+  public JSONObject data;
+  public CarZone(JSONObject data){
     super( "CarZone", 0, 0, 30, 30);
-    this.bodyStyle = bodyStyle;
+    this.data = data;
+    this.bodyStyle = data.getString("body-style");
     this.carColor = #f0027f;
     if(bodyStyle.equals("wagon")) this.carColor = #beaed4;
     if(bodyStyle.equals("sedan")) this.carColor = #fdc086;
     if(bodyStyle.equals("hatchback")) this.carColor = #ffff99;
     if(bodyStyle.equals("convertible")) this.carColor = #386cb0;
+    positionZone();
+  }
+  
+  private void positionZone(){
+    int width = displayWidth/5;
+    int location = 0;
+    if(this.bodyStyle.equals("hardtop")) location = 0;
+    else if(this.bodyStyle.equals("wagon")) location = 1;
+    else if(this.bodyStyle.equals("sedan")) location = 2;
+    else if(this.bodyStyle.equals("hatchback")) location = 3;
+    else location = 4;
+ 
     this.translate(
-      random( displayWidth - 100),
-      random( displayHeight - 100));
+      random( width - 50),
+      random( displayHeight - 50));
+    this.translate(location * width, 0);
   }
   
   @Override

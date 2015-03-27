@@ -1,8 +1,11 @@
 class HullZone extends ShapeZone {
   Vector<Vect2> vertices;
   Vector<CarZone> carZones;
-  public HullZone(Vector<Vect2> vertices){
+  int id;
+  
+  public HullZone(Vector<Vect2> vertices, int id){
     super("HullZone");
+    this.id = id;
     this.vertices = new Vector(vertices);
     this.carZones = new Vector<CarZone>();
   }

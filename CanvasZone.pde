@@ -7,23 +7,55 @@ import java.util.*;
 
 class CanvasZone extends Zone {
   int count=0;
+  int zoneId = 0;
   Data data;
   Touch currentTouch = null;
   Vector<Vect2> currentEnclosing;
   HashMap<Long, Vector<Touch>> touchTimeMap= new HashMap<Long, Vector<Touch>>();
   Map map = Collections.synchronizedMap(touchTimeMap);
+  NaiveBayes bayes;
+  
+  private void setUpClassifier(){
+    Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("make", "fuel-type", "num-of-doors", "body-style", "drive-wheels", "engine-location")));
+
+    bayes = new NaiveBayes(featureSet, 1.0);
+  
+//    Map<String, String> human = new HashMap<String, String>();
+//    human.put("color", "tan");
+//    human.put("legs", "two");
+//    bayes.insert("human", human);
+//  
+//    Map<String, String> horse = new HashMap<String, String>();
+//    horse.put("color", "brown");
+//    horse.put("legs",  "four");
+//    bayes.insert("horse", horse);
+//  
+//    Map<String, String> penguin = new HashMap<String, String>();
+//    penguin.put("color", "black and white");
+//    penguin.put("legs", "two");
+//    bayes.insert("penguin", penguin);
+//  
+//    Map<String, String> unknown = new HashMap<String, String>();
+//    unknown.put("color", "brown");
+//    unknown.put("legs", "four");
+//  
+//    Map<String, Double> prediction = bayes.classify(unknown);
+//    System.out.println(prediction);
+  }
+  
   
   public CanvasZone(){
     super( "CanvasZone",0,0,displayWidth,displayHeight);
     currentEnclosing = new Vector<Vect2>();
     data = new Data("cars.json");
     addData();
+    setUpClassifier();
   }
   
   private void addData(){
     for(int i=0; i<data.values.size(); i++){
       JSONObject car = data.values.getJSONObject(i);
-      this.add( new CarZone(car.getString("body-style"), car.getString("num-of-cylinders")));
+      this.add( new CarZone(car));
     }
   }
   
@@ -42,12 +74,50 @@ class CanvasZone extends Zone {
     return false;
   }
   
+  private void trainClassifier(CarZone cz){
+
+    Map<String, String> car = new HashMap<String, String>();
+    car.put("make", cz.data.getString("make"));
+    car.put("fuel-type",  cz.data.getString("fuel-type"));
+    car.put("num-of-doors",  cz.data.getString("num-of-doors"));
+    car.put("body-style",  cz.data.getString("body-style"));
+    car.put("drive-wheels",  cz.data.getString("drive-wheels"));
+    car.put("engine-location",  cz.data.getString("engine-location"));
+    
+//    println(cz.data.getString("make"));
+    bayes.insert(Integer.toString(zoneId), car);
+  }
+  
+  
+  private void printClassifications(){
+    int yes = 0;
+    int no = 0;
+    for(Zone cz : SMT.getZones()){
+      if(cz instanceof CarZone){
+        JSONObject data = ((CarZone)cz).data;
+        Map<String, String> car = new HashMap<String, String>();
+        car.put("make", data.getString("make"));
+        car.put("fuel-type",  data.getString("fuel-type"));
+        car.put("num-of-doors",  data.getString("num-of-doors"));
+        car.put("body-style",  data.getString("body-style"));
+        car.put("drive-wheels",  data.getString("drive-wheels"));
+        car.put("engine-location",  data.getString("engine-location"));
+        
+        Map<String, Double> prediction = bayes.classify(car);
+        System.out.println(prediction);
+//        if(prediction.isEmpty()) no++;
+//        else yes++;
+      }
+    }
+    println(yes+":"+no);
+  }
   private void checkInHulls(Zone cz){    
     for(Zone hz : SMT.getZones()){
       if(hz instanceof HullZone){
         if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
           ((CarZone)cz).setInHull(true);
           ((HullZone)hz).addCarZone((CarZone)cz);
+          trainClassifier((CarZone)cz);
           break;
         }
         else{
@@ -64,6 +134,7 @@ class CanvasZone extends Zone {
         checkInHulls(z);
       }
     }
+    printClassifications();
   }
   
   private void showTouchPoints(){
@@ -91,7 +162,7 @@ class CanvasZone extends Zone {
   @Override
   public void draw(){
     c=0;
-    checkLongHold();
+//    checkLongHold();
     showCurrentEnclosing();
 //    showCarZonesInside();
     showTouchPoints();
@@ -214,9 +285,10 @@ class CanvasZone extends Zone {
     count = 0;
     if(shouldAddHull()){
 //      println("ADD THAT HULL!");
-      this.add(new HullZone(currentEnclosing));
+      this.add(new HullZone(currentEnclosing, zoneId));
       putCarZoneOnTop();
       showCarZonesInside();
+      zoneId++;
     }
     synchronized(this.currentEnclosing){
       currentEnclosing.clear();
@@ -299,7 +371,7 @@ class CanvasZone extends Zone {
          Vector<Touch> temp = (Vector<Touch>)me.getValue();
          if(temp.size() == 1){
            Long time = temp.get(0).currentTime.getTotalMilliseconds() - temp.get(0).startTime.getTotalMilliseconds();
-            println(time);
+//            println(time);
             if(time > 1000 && carZoneActive()){
       //        println("ACTIVE");
               CarPieMenuZone m = SMT.get("CarPieMenu",CarPieMenuZone.class);
