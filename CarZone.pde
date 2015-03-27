@@ -28,7 +28,7 @@ class CarZone extends Zone {
  
     this.translate(
       random( width - 50),
-      random( displayHeight - 50));
+      random( displayHeight - 100));
     this.translate(location * width, 0);
   }
   

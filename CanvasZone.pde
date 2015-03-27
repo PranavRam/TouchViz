@@ -17,7 +17,7 @@ class CanvasZone extends Zone {
   
   private void setUpClassifier(){
     Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("make", "fuel-type", "num-of-doors", "body-style", "drive-wheels", "engine-location")));
-
+//Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("color", "legs")));
     bayes = new NaiveBayes(featureSet, 1.0);
   
 //    Map<String, String> human = new HashMap<String, String>();
@@ -36,8 +36,8 @@ class CanvasZone extends Zone {
 //    bayes.insert("penguin", penguin);
 //  
 //    Map<String, String> unknown = new HashMap<String, String>();
-//    unknown.put("color", "brown");
-//    unknown.put("legs", "four");
+//    unknown.put("color", "black and white");
+//    unknown.put("legs", "two");
 //  
 //    Map<String, Double> prediction = bayes.classify(unknown);
 //    System.out.println(prediction);
@@ -117,7 +117,7 @@ class CanvasZone extends Zone {
         if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
           ((CarZone)cz).setInHull(true);
           ((HullZone)hz).addCarZone((CarZone)cz);
-          trainClassifier((CarZone)cz);
+//          trainClassifier((CarZone)cz);
           break;
         }
         else{
@@ -134,7 +134,7 @@ class CanvasZone extends Zone {
         checkInHulls(z);
       }
     }
-    printClassifications();
+//    printClassifications();
   }
   
   private void showTouchPoints(){
