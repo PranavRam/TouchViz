@@ -1,16 +1,17 @@
 class CarZone extends Zone {
   public boolean dead = false;
   public double ani_step = 0;
-  public String name;
+  public String bodyStyle;
   public color carColor;
   public boolean inHull = false;
-  public CarZone(String name, String cylinderNum){
+  public CarZone(String bodyStyle, String cylinderNum){
     super( "CarZone", 0, 0, 30, 30);
-    this.name = name+"-"+cylinderNum;
-    this.carColor = #88dd88;
-    if(cylinderNum.equals("four")) this.carColor = #FF0000;
-    if(cylinderNum.equals("three")) this.carColor = #FF33CC;
-    if(cylinderNum.equals("two")) this.carColor = #0099FF;
+    this.bodyStyle = bodyStyle;
+    this.carColor = #f0027f;
+    if(bodyStyle.equals("wagon")) this.carColor = #beaed4;
+    if(bodyStyle.equals("sedan")) this.carColor = #fdc086;
+    if(bodyStyle.equals("hatchback")) this.carColor = #ffff99;
+    if(bodyStyle.equals("convertible")) this.carColor = #386cb0;
     this.translate(
       random( displayWidth - 100),
       random( displayHeight - 100));
@@ -40,7 +41,7 @@ class CarZone extends Zone {
       c++;
     }
     if(inHull){
-      text("In Hull "+name,100-getLocalX(),170+c*20-getLocalY());
+      text("In Hull "+bodyStyle,100-getLocalX(),170+c*20-getLocalY());
       c++;
     }
   }

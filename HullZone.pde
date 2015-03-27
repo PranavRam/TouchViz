@@ -10,7 +10,7 @@ class HullZone extends ShapeZone {
   @Override
   public void draw(){
 //    noFill();
-    fill(255);
+    fill(#7fc97f);
     beginShape();
     for(Vect2 v : vertices){
       vertex(v.x, v.y);
@@ -45,8 +45,11 @@ class HullZone extends ShapeZone {
   }
   
   void addCarZone(CarZone cz){
+    for(CarZone current : this.carZones){
+      if(cz.hashCode() == current.hashCode()) return;
+    }
     this.carZones.add(cz);
-    println(carZones.size());
+//    println(carZones.size());
   }
   
   void removeCarZone(CarZone cz){

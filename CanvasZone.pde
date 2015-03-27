@@ -23,7 +23,7 @@ class CanvasZone extends Zone {
   private void addData(){
     for(int i=0; i<data.values.size(); i++){
       JSONObject car = data.values.getJSONObject(i);
-      this.add( new CarZone(car.getString("make"), car.getString("num-of-cylinders")));
+      this.add( new CarZone(car.getString("body-style"), car.getString("num-of-cylinders")));
     }
   }
   
