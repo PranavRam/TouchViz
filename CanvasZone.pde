@@ -27,14 +27,31 @@ class CanvasZone extends Zone {
     }
   }
   
+  public boolean checkAndAddToHull(CarZone cz){
+    for(Zone hz : SMT.getZones()){
+      if(hz instanceof HullZone){
+        if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
+          ((HullZone)hz).addCarZone(cz);
+          return true;
+        }
+        else{
+          ((HullZone)hz).removeCarZone(cz);
+        }
+      }
+    }
+    return false;
+  }
+  
   private void checkInHulls(Zone cz){    
     for(Zone hz : SMT.getZones()){
       if(hz instanceof HullZone){
         if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
           ((CarZone)cz).setInHull(true);
+          ((HullZone)hz).addCarZone((CarZone)cz);
           break;
         }
         else{
+          ((HullZone)hz).removeCarZone((CarZone)cz);
           ((CarZone)cz).setInHull(false);
         }
       }
@@ -76,7 +93,7 @@ class CanvasZone extends Zone {
     c=0;
     checkLongHold();
     showCurrentEnclosing();
-    showCarZonesInside();
+//    showCarZonesInside();
     showTouchPoints();
   }
   
@@ -199,6 +216,7 @@ class CanvasZone extends Zone {
 //      println("ADD THAT HULL!");
       this.add(new HullZone(currentEnclosing));
       putCarZoneOnTop();
+      showCarZonesInside();
     }
     synchronized(this.currentEnclosing){
       currentEnclosing.clear();
@@ -308,11 +326,6 @@ class CanvasZone extends Zone {
     SMT.remove("CarPieMenu");
     CarPieMenuZone menu = new CarPieMenuZone((int)t.getX(), (int)t.getY());
     SMT.add(menu);
-  }
-  
-  @Override
-  public void press(Touch t){
-    println("Pressed");
   }
   
   private boolean carZoneActive(){

@@ -31,7 +31,7 @@ class CarZone extends Zone {
   
   @Override
   public void touchUp(Touch t){
-    if(inHull) println("In This dam hull");
+    inHull = ((CanvasZone)getParent()).checkAndAddToHull(this);
   }
   
   private void showText(){

@@ -1,8 +1,10 @@
 class HullZone extends ShapeZone {
   Vector<Vect2> vertices;
+  Vector<CarZone> carZones;
   public HullZone(Vector<Vect2> vertices){
     super("HullZone");
     this.vertices = new Vector(vertices);
+    this.carZones = new Vector<CarZone>();
   }
   
   @Override
@@ -19,7 +21,7 @@ class HullZone extends ShapeZone {
   
   @Override
   public void touch() {
-//    drag();
+    drag();
   }
   
   @Override
@@ -36,6 +38,24 @@ class HullZone extends ShapeZone {
 //    super.translate(x, y);
     for(Vect2 v : vertices){
       v.add(new Vect2(x,y));
+    }
+    for(CarZone cz : carZones){
+      cz.translate(x, y);
+    }
+  }
+  
+  void addCarZone(CarZone cz){
+    this.carZones.add(cz);
+    println(carZones.size());
+  }
+  
+  void removeCarZone(CarZone cz){
+    Iterator i = this.carZones.iterator();
+    while(i.hasNext()){
+      CarZone current = (CarZone)i.next();
+      if(current.hashCode() == cz.hashCode()){
+        i.remove();
+      }
     }
   }
   
