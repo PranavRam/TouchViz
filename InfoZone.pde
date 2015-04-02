@@ -1,8 +1,9 @@
 class InfoZone extends Zone {
   public JSONObject data;
   public InfoZone(JSONObject data){
-    super( "InfoZone", 0, 0, 100, 100);
+    super( "InfoZone", 0, 0, 150, 150);
     this.data = data;
+    
     positionZone();
   }
   
@@ -20,7 +21,6 @@ class InfoZone extends Zone {
   @Override
   
   public void touch() {
-    return;
   }
   
   void displayText(){
