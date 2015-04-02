@@ -15,7 +15,7 @@ class CanvasZone extends Zone {
   Map map = Collections.synchronizedMap(touchTimeMap);
   NaiveBayes bayes;
   
-  private void setUpClassifier(){
+  private void setupClassifier(){
     Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("make", "fuel-type", "num-of-doors", "body-style", "drive-wheels", "engine-location")));
 //Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("color", "legs")));
     bayes = new NaiveBayes(featureSet, 1.0);
@@ -49,7 +49,7 @@ class CanvasZone extends Zone {
     currentEnclosing = new Vector<Vect2>();
     data = new Data("cars.json");
     addData();
-    setUpClassifier();
+    setupClassifier();
   }
   
   private void addData(){
@@ -74,7 +74,7 @@ class CanvasZone extends Zone {
     return false;
   }
   
-  private void trainClassifier(CarZone cz){
+  private void trainClassifier(CarZone cz, int zoneId){
 
     Map<String, String> car = new HashMap<String, String>();
     car.put("make", cz.data.getString("make"));
@@ -86,6 +86,8 @@ class CanvasZone extends Zone {
     
 //    println(cz.data.getString("make"));
     bayes.insert(Integer.toString(zoneId), car);
+//    Map<String, Double> prediction = bayes.classify(car);
+//        System.out.println(prediction);
   }
   
   
@@ -93,7 +95,7 @@ class CanvasZone extends Zone {
     int yes = 0;
     int no = 0;
     for(Zone cz : SMT.getZones()){
-      if(cz instanceof CarZone){
+      if(cz instanceof CarZone && ((CarZone)cz).inHull){
         JSONObject data = ((CarZone)cz).data;
         Map<String, String> car = new HashMap<String, String>();
         car.put("make", data.getString("make"));
@@ -104,20 +106,21 @@ class CanvasZone extends Zone {
         car.put("engine-location",  data.getString("engine-location"));
         
         Map<String, Double> prediction = bayes.classify(car);
-        System.out.println(prediction);
+        System.out.println(prediction+" "+((CarZone)cz).carColor);
 //        if(prediction.isEmpty()) no++;
 //        else yes++;
       }
     }
-    println(yes+":"+no);
+//    println(yes+":"+no);
   }
-  private void checkInHulls(Zone cz){    
+  private void checkInHulls(Zone cz){
+//    setupClassifier(); 
     for(Zone hz : SMT.getZones()){
       if(hz instanceof HullZone){
         if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
           ((CarZone)cz).setInHull(true);
           ((HullZone)hz).addCarZone((CarZone)cz);
-//          trainClassifier((CarZone)cz);
+          trainClassifier((CarZone)cz, zoneId);
           break;
         }
         else{
@@ -134,7 +137,7 @@ class CanvasZone extends Zone {
         checkInHulls(z);
       }
     }
-//    printClassifications();
+    printClassifications();
   }
   
   private void showTouchPoints(){

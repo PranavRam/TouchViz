@@ -15,10 +15,10 @@ import megamu.mesh.*;
 import vialab.SMT.*;
 
 import java.util.Arrays;
-
+import java.util.concurrent.*;
 //Setup function for the applet
 Hull myHull;
-
+private final Map<Integer,String> colorMap = new ConcurrentHashMap<Integer,String>(11);
 Touch first=null;
 boolean assigned = false;
 ArrayList<PVector> zoneLocations;
@@ -27,7 +27,17 @@ int c = 0;
 
 void setup(){
   zoneLocations = new ArrayList<PVector>();
-  
+  colorMap.put(10,"#a6cee3");
+  colorMap.put(9,"#1f78b4");
+  colorMap.put(8,"#b2df8a");
+  colorMap.put(7,"#33a02c");
+  colorMap.put(6,"#fb9a99");
+  colorMap.put(5,"#e31a1c");
+  colorMap.put(4,"#fdbf6f");
+  colorMap.put(3,"#ff7f00");
+  colorMap.put(2,"#cab2d6");
+  colorMap.put(1,"#6a3d9a");
+  colorMap.put(0,"#ffff99");
   //SMT and Processing setup
   size( displayWidth, displayHeight, SMT.RENDERER);
   SMT.init( this, TouchSource.AUTOMATIC);

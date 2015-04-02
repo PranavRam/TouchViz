@@ -5,16 +5,22 @@ class CarZone extends Zone {
   public color carColor;
   public boolean inHull = false;
   public JSONObject data;
+  
+  InfoZone info;
+  boolean showInfo = false;
   public CarZone(JSONObject data){
-    super( "CarZone", 0, 0, 30, 30);
+    super( "CarZone", 0, 0, 40, 40);
     this.data = data;
     this.bodyStyle = data.getString("body-style");
-    this.carColor = #f0027f;
-    if(bodyStyle.equals("wagon")) this.carColor = #beaed4;
-    if(bodyStyle.equals("sedan")) this.carColor = #fdc086;
-    if(bodyStyle.equals("hatchback")) this.carColor = #ffff99;
-    if(bodyStyle.equals("convertible")) this.carColor = #386cb0;
+    this.carColor = #386cb0;
+//    if(bodyStyle.equals("wagon")) this.carColor = #beaed4;
+//    if(bodyStyle.equals("sedan")) this.carColor = #fdc086;
+//    if(bodyStyle.equals("hatchback")) this.carColor = #ffff99;
+//    if(bodyStyle.equals("convertible")) this.carColor = #386cb0;
     positionZone();
+    info = new InfoZone(data);
+    this.add(info);
+    info.setVisible(false);
   }
   
   private void positionZone(){
@@ -35,7 +41,8 @@ class CarZone extends Zone {
   @Override
   public void draw(){
     fill(carColor);
-    rect(0, 0, 30, 30);
+    if(showInfo) fill(#af8dc3);
+    rect(0, 0, 40, 40);
     showText();
   }
   
@@ -46,8 +53,17 @@ class CarZone extends Zone {
   }
   
   @Override
+  public void touchDown(Touch t) {
+    showInfo = !showInfo;
+    info.setVisible(showInfo);
+    this.getParent().putChildOnTop(this);
+//    this.getParent().putChildOnTop(info);
+  }
+  
+  @Override
   public void touchUp(Touch t){
     inHull = ((CanvasZone)getParent()).checkAndAddToHull(this);
+    if(!inHull) this.carColor = #386cb0;
   }
   
   private void showText(){
