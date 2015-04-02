@@ -63,7 +63,7 @@ class CarZone extends Zone {
   @Override
   public void touchUp(Touch t){
     inHull = ((CanvasZone)getParent()).checkAndAddToHull(this);
-    if(!inHull) this.carColor = #386cb0;
+//    if(!inHull) this.carColor = #386cb0;
   }
   
   private void showText(){

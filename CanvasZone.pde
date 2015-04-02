@@ -95,7 +95,7 @@ class CanvasZone extends Zone {
     int yes = 0;
     int no = 0;
     for(Zone cz : SMT.getZones()){
-      if(cz instanceof CarZone && ((CarZone)cz).inHull){
+      if(cz instanceof CarZone){
         JSONObject data = ((CarZone)cz).data;
         Map<String, String> car = new HashMap<String, String>();
         car.put("make", data.getString("make"));
@@ -106,7 +106,21 @@ class CanvasZone extends Zone {
         car.put("engine-location",  data.getString("engine-location"));
         
         Map<String, Double> prediction = bayes.classify(car);
-        System.out.println(prediction+" "+((CarZone)cz).carColor);
+        double max = Double.NEGATIVE_INFINITY;
+        Iterator it = prediction.entrySet().iterator();
+        String maxValue = "0";
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+//            System.out.println(pair.getKey() + " = " + pair.getValue());
+            if((Double)pair.getValue() > max) {
+              maxValue = (String)pair.getKey();
+              max = (Double)pair.getValue();
+            }
+        }
+        String col = colorMap.get(Integer.parseInt(maxValue));
+        col = "FF" + col.substring(1);
+        ((CarZone)cz).carColor = unhex(col);
+//        System.out.println(prediction+" "+((CarZone)cz).carColor);
 //        if(prediction.isEmpty()) no++;
 //        else yes++;
       }
