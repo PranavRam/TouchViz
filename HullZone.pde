@@ -47,12 +47,22 @@ class HullZone extends ShapeZone {
     }
   }
   
+  void syncWithFirebase(){
+    Firebase firebaseHullRef = myFirebaseRef.child("hullZones");
+    HashMap<String,HashMap<String, String>> temp = new HashMap<String, HashMap<String, String>>();
+    for(CarZone cz : this.carZones){
+      temp.put(Integer.toString(cz.hashCode()), cz.getCarDetails());
+    }
+    firebaseHullRef.child(Integer.toString(id)).setValue(temp);
+  }
+
   void addCarZone(CarZone cz){
     for(CarZone current : this.carZones){
       if(cz.hashCode() == current.hashCode()) return;
     }
     this.carZones.add(cz);
     ((CanvasZone)getParent()).retrainClassifier();
+    syncWithFirebase();
     // String col = colorMap.get(id);
     // col = "FF" + col.substring(1);
     // cz.carColor = unhex(col);
@@ -65,6 +75,7 @@ class HullZone extends ShapeZone {
       CarZone current = (CarZone)i.next();
       if(current.hashCode() == cz.hashCode()){
         i.remove();
+        syncWithFirebase();
       }
     }
   }

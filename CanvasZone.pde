@@ -353,14 +353,15 @@ class CanvasZone extends Zone {
     if(shouldAddHull()){
 //      println("ADD THAT HULL!");
 //      setupClassifier();
-      this.add(new HullZone(currentEnclosing, zoneId));
+      HullZone hz = new HullZone(currentEnclosing, zoneId);
+      this.add(hz);
       putCarZoneOnTop();
       showCarZonesInside();
       bayes.buildClassifier();
       // printClassifications();
       classifyCars();
-      Firebase firebaseHullRef = myFirebaseRef.child("hullZones");
-      firebaseHullRef.child(Integer.toString(zoneId)).setValue("HullZone "+zoneId);
+      // Firebase firebaseHullRef = myFirebaseRef.child("hullZones");
+      // firebaseHullRef.child(Integer.toString(zoneId)).setValue("HullZone "+zoneId);
       zoneId++;
     }
     synchronized(this.currentEnclosing){
