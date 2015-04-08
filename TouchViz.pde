@@ -1,13 +1,6 @@
 import point2line.*;
 
 import megamu.mesh.*;
-//import weka.classifiers.Classifier;
-//import weka.classifiers.Evaluation;
-//import weka.classifiers.bayes.NaiveBayes;
-//import weka.core.Attribute;
-//import weka.core.FastVector;
-//import weka.core.Instance;
-//import weka.core.Instances;
 /**
  * Sketch for Gesture Api
  */
@@ -25,7 +18,18 @@ ArrayList<PVector> zoneLocations;
 
 int c = 0;
 
+
+public void setupClassifier(){
+  NB naiveBayes = new NB();
+  naiveBayes.setupFeatureVector();
+  naiveBayes.buildClassifier();
+  // naiveBayes.testClassifier();
+  naiveBayes.classify();
+
+}
+
 void setup(){
+  setupClassifier();
   zoneLocations = new ArrayList<PVector>();
   colorMap.put(10,"#a6cee3");
   colorMap.put(9,"#1f78b4");

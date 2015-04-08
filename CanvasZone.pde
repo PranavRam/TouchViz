@@ -18,7 +18,7 @@ class CanvasZone extends Zone {
   private void setupClassifier(){
     Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("make", "fuel-type", "num-of-doors", "body-style", "drive-wheels", "engine-location")));
 //Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("color", "legs")));
-    bayes = new NaiveBayes(featureSet, 1.0);
+    // bayes = new NaiveBayes(featureSet, 1.0);
   
 //    Map<String, String> human = new HashMap<String, String>();
 //    human.put("color", "tan");
@@ -49,7 +49,7 @@ class CanvasZone extends Zone {
     currentEnclosing = new Vector<Vect2>();
     data = new Data("cars.json");
     addData();
-    setupClassifier();
+    // setupClassifier();
   }
   
   private void addData(){
@@ -85,7 +85,7 @@ class CanvasZone extends Zone {
     car.put("engine-location",  cz.data.getString("engine-location"));
     
 //    println(cz.data.getString("make"));
-    bayes.insert(Integer.toString(zoneId), car);
+    // bayes.insert(Integer.toString(zoneId), car);
 //    Map<String, Double> prediction = bayes.classify(car);
 //        System.out.println(prediction);
   }
@@ -105,21 +105,21 @@ class CanvasZone extends Zone {
         car.put("drive-wheels",  data.getString("drive-wheels"));
         car.put("engine-location",  data.getString("engine-location"));
         
-        Map<String, Double> prediction = bayes.classify(car);
-        double max = Double.NEGATIVE_INFINITY;
-        Iterator it = prediction.entrySet().iterator();
-        String maxValue = "0";
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
-//            System.out.println(pair.getKey() + " = " + pair.getValue());
-            if((Double)pair.getValue() > max) {
-              maxValue = (String)pair.getKey();
-              max = (Double)pair.getValue();
-            }
-        }
-        String col = colorMap.get(Integer.parseInt(maxValue));
-        col = "FF" + col.substring(1);
-        ((CarZone)cz).carColor = unhex(col);
+//         Map<String, Double> prediction = bayes.classify(car);
+//         double max = Double.NEGATIVE_INFINITY;
+//         Iterator it = prediction.entrySet().iterator();
+//         String maxValue = "0";
+//         while (it.hasNext()) {
+//             Map.Entry pair = (Map.Entry)it.next();
+// //            System.out.println(pair.getKey() + " = " + pair.getValue());
+//             if((Double)pair.getValue() > max) {
+//               maxValue = (String)pair.getKey();
+//               max = (Double)pair.getValue();
+//             }
+//         }
+//         String col = colorMap.get(Integer.parseInt(maxValue));
+//         col = "FF" + col.substring(1);
+//         ((CarZone)cz).carColor = unhex(col);
 //        System.out.println(prediction+" "+((CarZone)cz).carColor);
 //        if(prediction.isEmpty()) no++;
 //        else yes++;
@@ -134,7 +134,7 @@ class CanvasZone extends Zone {
         if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
           ((CarZone)cz).setInHull(true);
           ((HullZone)hz).addCarZone((CarZone)cz);
-          trainClassifier((CarZone)cz, zoneId);
+          // trainClassifier((CarZone)cz, zoneId);
           break;
         }
         else{
@@ -151,7 +151,7 @@ class CanvasZone extends Zone {
         checkInHulls(z);
       }
     }
-    printClassifications();
+    // printClassifications();
   }
   
   private void showTouchPoints(){
