@@ -1,5 +1,5 @@
 import point2line.*;
-
+// import com.firebase.client.Firebase;
 import megamu.mesh.*;
 /**
  * Sketch for Gesture Api
@@ -20,6 +20,7 @@ int c = 0;
 
 void setup(){
   // setupClassifier();
+  // Firebase.setAndroidContext(this);
   zoneLocations = new ArrayList<PVector>();
   colorMap.put(10,"#a6cee3");
   colorMap.put(9,"#1f78b4");

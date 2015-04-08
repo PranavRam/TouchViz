@@ -15,6 +15,20 @@ class CanvasZone extends Zone {
   Map map = Collections.synchronizedMap(touchTimeMap);
   NB bayes;
   
+  public void retrainClassifier(){
+    bayes.clearTrainingSet();
+    for(Zone hz : SMT.getZones()){
+      if(hz instanceof HullZone){
+        HullZone hullZone = (HullZone)hz;
+        Vector<CarZone> carZones = hullZone.carZones;
+        for(CarZone cz : carZones){
+          bayes.addToTrainingSet(cz.data, Integer.toString(hullZone.id));
+        }
+      }
+    }
+    bayes.buildClassifier();
+    classifyCars();
+  }
   private void setupClassifier(){
     // Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("make", "fuel-type", "num-of-doors", "body-style", "drive-wheels", "engine-location")));
 //Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("color", "legs")));

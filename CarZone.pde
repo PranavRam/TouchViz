@@ -56,21 +56,31 @@ class CarZone extends Zone {
   Touch previousTouch = null;
   @Override
   public void touchDown(Touch t) {
-    // float distance = Vect2.distance(new Vect2(t.getX(), t.getY()), new Vect2(previousTouch.getX(), previousTouch.getY()));
-    // if(previousTouch == null && distance < 10){
+    long time = 0;
+    if(previousTouch != null){
+      // Vect2 currentPoint = new Vect2(t.getX(), t.getY());
+      // Vect2 prevPoint = new Vect2(previousTouch.getX(), previousTouch.getY());
+      // distance = Vect2.distance(currentPoint, prevPoint);
+      // println(distance);
+      long prevTime = previousTouch.getTuioTime().getTotalMilliseconds();
+      long currentTime = t.getTuioTime().getTotalMilliseconds();
+      time = currentTime - prevTime;
+    }
+    if(previousTouch != null && time < 1000){
       showInfo = !showInfo;
       info.setVisible(showInfo);
       info.setPickable(showInfo);
       this.getParent().putChildOnTop(this);
-    // }
+    }
 //    this.getParent().putChildOnTop(info);
     previousTouch = t;
   }
   
   @Override
   public void touchUp(Touch t){
+    boolean prevInHull = inHull;
     inHull = ((CanvasZone)getParent()).checkAndAddToHull(this);
-    // if(!inHull) this.carColor = #386cb0;
+    if(prevInHull && !inHull) ((CanvasZone)getParent()).retrainClassifier();
   }
   
   private void showText(){

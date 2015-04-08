@@ -52,9 +52,10 @@ class HullZone extends ShapeZone {
       if(cz.hashCode() == current.hashCode()) return;
     }
     this.carZones.add(cz);
-    String col = colorMap.get(id);
-    col = "FF" + col.substring(1);
-    cz.carColor = unhex(col);
+    ((CanvasZone)getParent()).retrainClassifier();
+    // String col = colorMap.get(id);
+    // col = "FF" + col.substring(1);
+    // cz.carColor = unhex(col);
 //    println(carZones.size());
   }
   
