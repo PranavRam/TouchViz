@@ -44,7 +44,7 @@ class CarZone extends Zone {
     fill(carColor);
     if(showInfo) fill(#af8dc3);
     rect(0, 0, 40, 40);
-    showText();
+    // showText();
   }
   
   @Override
@@ -70,7 +70,7 @@ class CarZone extends Zone {
   @Override
   public void touchUp(Touch t){
     inHull = ((CanvasZone)getParent()).checkAndAddToHull(this);
-    if(!inHull) this.carColor = #386cb0;
+    // if(!inHull) this.carColor = #386cb0;
   }
   
   private void showText(){

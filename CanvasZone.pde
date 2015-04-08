@@ -13,10 +13,10 @@ class CanvasZone extends Zone {
   Vector<Vect2> currentEnclosing;
   HashMap<Long, Vector<Touch>> touchTimeMap= new HashMap<Long, Vector<Touch>>();
   Map map = Collections.synchronizedMap(touchTimeMap);
-  NaiveBayes bayes;
+  NB bayes;
   
   private void setupClassifier(){
-    Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("make", "fuel-type", "num-of-doors", "body-style", "drive-wheels", "engine-location")));
+    // Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("make", "fuel-type", "num-of-doors", "body-style", "drive-wheels", "engine-location")));
 //Set<String> featureSet = new HashSet<String>(new ArrayList<String>(Arrays.asList("color", "legs")));
     // bayes = new NaiveBayes(featureSet, 1.0);
   
@@ -41,15 +41,20 @@ class CanvasZone extends Zone {
 //  
 //    Map<String, Double> prediction = bayes.classify(unknown);
 //    System.out.println(prediction);
+    bayes = new NB();
+    bayes.setupFeatureVector();
+    // naiveBayes.buildClassifier();
+    // naiveBayes.testClassifier();
+    // naiveBayes.classify();
   }
   
   
   public CanvasZone(){
     super( "CanvasZone",0,0,displayWidth,displayHeight);
     currentEnclosing = new Vector<Vect2>();
-    data = new Data("cars.json");
+    data = new Data("cars2.json");
     addData();
-    // setupClassifier();
+    setupClassifier();
   }
   
   private void addData(){
@@ -90,20 +95,41 @@ class CanvasZone extends Zone {
 //        System.out.println(prediction);
   }
   
-  
+  private void classifyCars(){
+    for(Zone cz : SMT.getZones()){
+      if(cz instanceof CarZone){
+        JSONObject data = ((CarZone)cz).data;
+        double[] classification = bayes.classify(data);
+        double maxValue = classification[0];
+        int loc = 0;
+        for(int i=0; i<classification.length; i++){
+          if(maxValue < classification[i]){
+            maxValue = classification[i];
+            loc = i;
+          }
+        }
+        String col = colorMap.get(loc);
+        col = "FF" + col.substring(1);
+        ((CarZone)cz).carColor = unhex(col);
+      }
+    }
+  }
+
   private void printClassifications(){
     int yes = 0;
     int no = 0;
     for(Zone cz : SMT.getZones()){
       if(cz instanceof CarZone){
         JSONObject data = ((CarZone)cz).data;
-        Map<String, String> car = new HashMap<String, String>();
-        car.put("make", data.getString("make"));
-        car.put("fuel-type",  data.getString("fuel-type"));
-        car.put("num-of-doors",  data.getString("num-of-doors"));
-        car.put("body-style",  data.getString("body-style"));
-        car.put("drive-wheels",  data.getString("drive-wheels"));
-        car.put("engine-location",  data.getString("engine-location"));
+        double[] classification = bayes.classify(data);
+        println(classification);
+        // Map<String, String> car = new HashMap<String, String>();
+        // car.put("make", data.getString("make"));
+        // car.put("fuel-type",  data.getString("fuel-type"));
+        // car.put("num-of-doors",  data.getString("num-of-doors"));
+        // car.put("body-style",  data.getString("body-style"));
+        // car.put("drive-wheels",  data.getString("drive-wheels"));
+        // car.put("engine-location",  data.getString("engine-location"));
         
 //         Map<String, Double> prediction = bayes.classify(car);
 //         double max = Double.NEGATIVE_INFINITY;
@@ -134,7 +160,7 @@ class CanvasZone extends Zone {
         if(((HullZone)hz).pointInside(new Vect2(cz.getLocalX()+15, cz.getLocalY()+15))){
           ((CarZone)cz).setInHull(true);
           ((HullZone)hz).addCarZone((CarZone)cz);
-          // trainClassifier((CarZone)cz, zoneId);
+          bayes.addToTrainingSet(((CarZone)cz).data, Integer.toString(zoneId));
           break;
         }
         else{
@@ -151,7 +177,6 @@ class CanvasZone extends Zone {
         checkInHulls(z);
       }
     }
-    // printClassifications();
   }
   
   private void showTouchPoints(){
@@ -306,6 +331,9 @@ class CanvasZone extends Zone {
       this.add(new HullZone(currentEnclosing, zoneId));
       putCarZoneOnTop();
       showCarZonesInside();
+      bayes.buildClassifier();
+      // printClassifications();
+      classifyCars();
       zoneId++;
     }
     synchronized(this.currentEnclosing){
