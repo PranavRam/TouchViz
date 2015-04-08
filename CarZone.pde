@@ -56,6 +56,9 @@ class CarZone extends Zone {
   Touch previousTouch = null;
   @Override
   public void touchDown(Touch t) {
+    HashMap<String,String> car = getCarDetails();
+
+    myFirebaseRef.child("currentCarZone").setValue(car);
     long time = 0;
     if(previousTouch != null){
       // Vect2 currentPoint = new Vect2(t.getX(), t.getY());
@@ -98,5 +101,36 @@ class CarZone extends Zone {
 //    text("In Hull "+name,100-getLocalX(),170+c*20-getLocalY());
 //    c++;
     this.inHull = inHull;
+  }
+
+  private HashMap<String, String> getCarDetails(){
+    HashMap<String,String> car = new HashMap<String, String>();
+    car.put("symboling", Float.toString(data.getFloat("symboling")));      
+    car.put("normalized-losses",  Float.toString(data.getFloat("normalized-losses")));      
+    car.put("make", data.getString("make"));
+    car.put("fuel-type", data.getString("fuel-type"));
+    car.put("aspiration", data.getString("aspiration"));
+    car.put("num-of-doors", data.getString("num-of-doors"));
+    car.put("body-style", data.getString("body-style"));
+    car.put("drive-wheels", data.getString("drive-wheels"));
+    car.put("engine-location", data.getString("engine-location"));
+    car.put("wheel-base",  Float.toString(data.getFloat("wheel-base")));
+    car.put("length",  Float.toString(data.getFloat("length")));
+    car.put("width",  Float.toString(data.getFloat("width")));
+    car.put("height",  Float.toString(data.getFloat("height")));
+    car.put("curb-weigh",  Float.toString(data.getFloat("curb-weigh")));
+    car.put("engine-type", data.getString("engine-type"));
+    car.put("num-of-cylinders", data.getString("num-of-cylinders"));
+    car.put("engine-size", Float.toString(data.getFloat("engine-size")));
+    car.put("fuel-system", data.getString("fuel-system"));
+    car.put("bore",  Float.toString(data.getFloat("bore")));
+    car.put("stroke",  Float.toString(data.getFloat("stroke")));
+    car.put("compression-ratio",  Float.toString(data.getFloat("compression-ratio")));
+    car.put("horsepower",  Float.toString(data.getFloat("horsepower")));
+    car.put("peak-rpm",  Float.toString(data.getFloat("peak-rpm")));
+    car.put("city-mpg",  Float.toString(data.getFloat("city-mpg")));
+    car.put("highway-mpg",  Float.toString(data.getFloat("highway-mpg")));
+    car.put("price",  Float.toString(data.getFloat("price")));
+    return car;
   }
 }

@@ -1,5 +1,5 @@
 import point2line.*;
-// import com.firebase.client.Firebase;
+import com.firebase.client.*;
 import megamu.mesh.*;
 /**
  * Sketch for Gesture Api
@@ -15,12 +15,12 @@ private final Map<Integer,String> colorMap = new ConcurrentHashMap<Integer,Strin
 Touch first=null;
 boolean assigned = false;
 ArrayList<PVector> zoneLocations;
-
+Firebase myFirebaseRef;
 int c = 0;
 
 void setup(){
   // setupClassifier();
-  // Firebase.setAndroidContext(this);
+  myFirebaseRef = new Firebase("https://amber-heat-7101.firebaseio.com/");
   zoneLocations = new ArrayList<PVector>();
   colorMap.put(10,"#a6cee3");
   colorMap.put(9,"#1f78b4");

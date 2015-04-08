@@ -65,6 +65,17 @@ class CanvasZone extends Zone {
   
   public CanvasZone(){
     super( "CanvasZone",0,0,displayWidth,displayHeight);
+    // myFirebaseRef.child("message").setValue("Do you have data? You'll love Pranav.");
+    myFirebaseRef.child("currentCarZone").addValueEventListener(new ValueEventListener() {
+
+      @Override
+      public void onDataChange(DataSnapshot snapshot) {
+        // System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
+      }
+
+      @Override public void onCancelled(FirebaseError error) { }
+
+    });
     currentEnclosing = new Vector<Vect2>();
     data = new Data("cars2.json");
     addData();
@@ -348,6 +359,8 @@ class CanvasZone extends Zone {
       bayes.buildClassifier();
       // printClassifications();
       classifyCars();
+      Firebase firebaseHullRef = myFirebaseRef.child("hullZones");
+      firebaseHullRef.child(Integer.toString(zoneId)).setValue("HullZone "+zoneId);
       zoneId++;
     }
     synchronized(this.currentEnclosing){
