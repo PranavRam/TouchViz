@@ -302,6 +302,7 @@ class CanvasZone extends Zone {
     count = 0;
     if(shouldAddHull()){
 //      println("ADD THAT HULL!");
+//      setupClassifier();
       this.add(new HullZone(currentEnclosing, zoneId));
       putCarZoneOnTop();
       showCarZonesInside();

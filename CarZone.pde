@@ -21,6 +21,7 @@ class CarZone extends Zone {
     info = new InfoZone(data);
     this.add(info);
     info.setVisible(false);
+    info.setPickable(false);
   }
   
   private void positionZone(){
@@ -52,18 +53,24 @@ class CarZone extends Zone {
     rst();
   }
   
+  Touch previousTouch = null;
   @Override
   public void touchDown(Touch t) {
-    showInfo = !showInfo;
-    info.setVisible(showInfo);
-    this.getParent().putChildOnTop(this);
+    // float distance = Vect2.distance(new Vect2(t.getX(), t.getY()), new Vect2(previousTouch.getX(), previousTouch.getY()));
+    // if(previousTouch == null && distance < 10){
+      showInfo = !showInfo;
+      info.setVisible(showInfo);
+      info.setPickable(showInfo);
+      this.getParent().putChildOnTop(this);
+    // }
 //    this.getParent().putChildOnTop(info);
+    previousTouch = t;
   }
   
   @Override
   public void touchUp(Touch t){
     inHull = ((CanvasZone)getParent()).checkAndAddToHull(this);
-//    if(!inHull) this.carColor = #386cb0;
+    if(!inHull) this.carColor = #386cb0;
   }
   
   private void showText(){
